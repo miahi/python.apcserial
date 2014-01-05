@@ -5,7 +5,6 @@ __author__ = 'miahi'
 import serial
 import csv
 import time
-import datetime
 
 PORT = 'COM2'
 BAUDRATE = 2400
@@ -60,7 +59,7 @@ class APCSerial(object):
 
 def main():
     apcserial = APCSerial(PORT, BAUDRATE)
-    filename = 'apc_log_' + time.strftime("%Y-%m-%d_%H%M%S", time.gmtime()) + '.csv'
+    filename = 'apc_log_' + time.strftime('%Y-%m-%d_%H%M%S', time.gmtime()) + '.csv'
 
     with open(filename, 'a+b', buffering=1) as csvfile:
         outwriter = csv.writer(csvfile, delimiter=',')
@@ -68,12 +67,13 @@ def main():
                             'MinLineVoltage[V]', 'OutputVoltage[V]', 'Frequency[Hz]', 'EstimatedRuntime[min]',
                             'Temperature[C]'])
         while True:
-            outwriter.writerow([datetime.datetime.now(), apcserial.read_power(), apcserial.read_batt_level(),
-                                apcserial.read_batt_voltage(),
-                                apcserial.read_line_voltage(), apcserial.read_max_line_voltage(),
-                                apcserial.read_min_line_voltage(), apcserial.read_output_voltage(),
-                                apcserial.read_frequency(),
-                                apcserial.read_runtime(), apcserial.read_temperature()])
+            outwriter.writerow(
+                [time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime()), apcserial.read_power(), apcserial.read_batt_level(),
+                 apcserial.read_batt_voltage(),
+                 apcserial.read_line_voltage(), apcserial.read_max_line_voltage(),
+                 apcserial.read_min_line_voltage(), apcserial.read_output_voltage(),
+                 apcserial.read_frequency(),
+                 apcserial.read_runtime(), apcserial.read_temperature()])
             csvfile.flush()
             time.sleep(SLEEP_SECONDS)
 
