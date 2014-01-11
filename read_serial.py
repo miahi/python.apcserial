@@ -49,12 +49,43 @@ class APCSerial(object):
     def read_runtime(self):
         self.serial.write('j')
         response = self.serial.readline()
-        return int(float(response.rstrip().rstrip(':')))
+        return int(self._parse_number(response))
+
 
     def _read_number(self, command):
         self.serial.write(command)
         response = self.serial.readline()
-        return float(response.rstrip())
+        return self._parse_number(response)
+
+    @staticmethod
+    def _parse_number(result):
+        result = result.rstrip().rstrip(':')
+        # todo: the following unrequested characters are alert messages sent by the UPS, they should be logged
+        if '!' in result:  # Line Failure
+            result = result.replace('!', '')
+        if '$' in result:  # Power restored
+            result = result.replace('$', '')
+        if '%' in result:  # Low battery
+            result = result.replace('%', '')
+        if '+' in result:  # Return from low battery
+            result = result.replace('+', '')
+        if '?' in result:  # Abnormal condition
+            result = result.replace('?', '')
+        if '=' in result:  # Return from abnormal condition
+            result = result.replace('=', '')
+        if '*' in result:  # Turning off
+            result = result.replace('*', '')
+        if '#' in result:  # Replace battery
+            result = result.replace('#', '')
+        if '&' in result:  # Alarm registry
+            result = result.replace('&', '')
+        if '|' in result:  # EEPROM write
+            result = result.replace('|', '')
+        try:
+            return float(result)
+        except ValueError as detail:
+            print "Error during parse:", result, detail
+            return -1
 
 
 def main():
